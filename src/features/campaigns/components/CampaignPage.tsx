@@ -13,12 +13,10 @@ export default function CampaignPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newBudget, setNewBudget] = useState(0);
@@ -57,10 +55,6 @@ export default function CampaignPage() {
     startIndex + itemsPerPage
   );
 
-  const isAllSelected =
-    paginatedCampaigns.length > 0 &&
-    paginatedCampaigns.every((c) => selectedIds.includes(c.id));
-
   /* ================= CRUD ================= */
 
   const handleAddCampaign = () => {
@@ -95,7 +89,6 @@ export default function CampaignPage() {
     setCampaigns((prev) => prev.filter((c) => c.id !== id));
   };
 
-  /* ================= STATUS TOGGLE ================= */
   const handleStatusToggle = async (campaign: Campaign) => {
     const newStatus = campaign.status === "Active" ? "Paused" : "Active";
     const previous = [...campaigns];
@@ -111,7 +104,7 @@ export default function CampaignPage() {
 
     try {
       await updateCampaignStatus(campaign.id, newStatus);
-    } catch (err: any) {
+    } catch {
       setCampaigns(previous);
       setError("Failed to update status");
     } finally {
@@ -120,9 +113,9 @@ export default function CampaignPage() {
   };
 
   /* ================= UI ================= */
+
   return (
     <div className="p-8 min-h-screen bg-gray-900 text-gray-100">
-      {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Campaign Management</h1>
         <button
@@ -139,7 +132,7 @@ export default function CampaignPage() {
         </div>
       )}
 
-      {/* FILTERS */}
+      {/* Filters */}
       <div className="flex gap-4 mb-6 flex-wrap">
         <input
           type="text"
@@ -162,7 +155,7 @@ export default function CampaignPage() {
         </select>
       </div>
 
-      {/* TABLE */}
+      {/* Table */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-700 text-gray-300">
@@ -224,7 +217,9 @@ export default function CampaignPage() {
                           : "bg-yellow-600/20 text-yellow-400 border border-yellow-600"
                       }`}
                     >
-                      {campaign.status}
+                      {loadingId === campaign.id
+                        ? "Updating..."
+                        : campaign.status}
                     </button>
                   </td>
 
@@ -250,7 +245,7 @@ export default function CampaignPage() {
         </table>
       </div>
 
-      {/* PAGINATION */}
+      {/* Pagination */}
       <div className="flex justify-center gap-4 mt-6">
         <button
           disabled={currentPage === 1}
@@ -273,7 +268,7 @@ export default function CampaignPage() {
         </button>
       </div>
 
-      {/* MODAL */}
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
           <div className="bg-gray-800 p-6 rounded-lg w-96">
